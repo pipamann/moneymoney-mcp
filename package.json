@@ -1,0 +1,40 @@
+{
+  "name": "moneymoney-mcp",
+  "version": "0.1.0",
+  "description": "Read-only MCP server for MoneyMoney — the macOS personal finance app",
+  "type": "module",
+  "bin": {
+    "moneymoney-mcp": "dist/index.js"
+  },
+  "main": "dist/index.js",
+  "engines": {
+    "node": ">=18"
+  },
+  "os": [
+    "darwin"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch"
+  },
+  "keywords": [
+    "mcp",
+    "moneymoney",
+    "finance",
+    "banking",
+    "applescript",
+    "macos",
+    "model-context-protocol"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "plist": "^3.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/plist": "^3.0.5",
+    "typescript": "^5.7.0"
+  }
+}
