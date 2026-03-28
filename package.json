@@ -1,7 +1,7 @@
 {
   "name": "moneymoney-mcp",
   "version": "0.1.0",
-  "description": "Read-only MCP server for MoneyMoney — the macOS personal finance app",
+  "description": "MCP server for MoneyMoney — the macOS personal finance app",
   "type": "module",
   "bin": {
     "moneymoney-mcp": "dist/index.js"

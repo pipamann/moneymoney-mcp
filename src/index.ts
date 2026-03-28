@@ -8,6 +8,7 @@ import { exportAccounts } from "./tools/accounts.js";
 import { exportCategories } from "./tools/categories.js";
 import { exportTransactions } from "./tools/transactions.js";
 import { exportPortfolio } from "./tools/portfolio.js";
+import { createBankTransfer } from "./tools/transfer.js";
 
 /** Validate YYYY-MM-DD is a real date */
 function isValidDate(s: string): boolean {
@@ -195,6 +196,94 @@ server.registerTool(
             text: JSON.stringify({ positions }, null, 2),
           },
         ],
+      };
+    } catch (e) {
+      return errorResult(e);
+    }
+  },
+);
+
+// --- create_bank_transfer ---
+server.registerTool(
+  "create_bank_transfer",
+  {
+    title: "Create Bank Transfer",
+    description:
+      "Opens a pre-filled bank transfer window in MoneyMoney for the user to review and confirm. The transfer is NOT sent automatically — the user must approve it in MoneyMoney (including TAN confirmation).",
+    inputSchema: z.object({
+      fromAccount: z
+        .string()
+        .trim()
+        .min(1)
+        .optional()
+        .describe(
+          "Source account: UUID, IBAN, account number, or name",
+        ),
+      recipientName: z
+        .string()
+        .trim()
+        .min(1)
+        .optional()
+        .describe("Recipient name"),
+      iban: z
+        .string()
+        .trim()
+        .min(1)
+        .optional()
+        .describe("Recipient IBAN"),
+      bic: z
+        .string()
+        .trim()
+        .min(1)
+        .optional()
+        .describe("Recipient BIC (usually auto-detected from IBAN)"),
+      amount: z
+        .number()
+        .positive()
+        .finite()
+        .optional()
+        .describe("Transfer amount in EUR"),
+      purpose: z
+        .string()
+        .trim()
+        .min(1)
+        .optional()
+        .describe("Payment purpose / remittance text"),
+      endToEndReference: z
+        .string()
+        .trim()
+        .min(1)
+        .optional()
+        .describe("SEPA end-to-end reference"),
+      purposeCode: z
+        .string()
+        .trim()
+        .min(1)
+        .optional()
+        .describe("SEPA purpose code"),
+      instant: z
+        .boolean()
+        .optional()
+        .default(false)
+        .describe("Use instant transfer (Echtzeitüberweisung)"),
+      scheduledDate: z
+        .string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/)
+        .refine((s) => isValidDate(s), "Invalid date")
+        .optional()
+        .describe("Scheduled date for future transfer (YYYY-MM-DD)"),
+    }),
+    annotations: {
+      readOnlyHint: false,
+      destructiveHint: true,
+      openWorldHint: false,
+    },
+  },
+  async (params) => {
+    try {
+      const message = await createBankTransfer(params);
+      return {
+        content: [{ type: "text" as const, text: message }],
       };
     } catch (e) {
       return errorResult(e);

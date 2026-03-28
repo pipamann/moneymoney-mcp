@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![macOS only](https://img.shields.io/badge/platform-macOS-lightgrey?logo=apple)](https://moneymoney-app.com/)
 
-Lass deinen KI-Assistenten deine Finanzen aus [MoneyMoney](https://moneymoney-app.com/) analysieren — Kontostände, Transaktionen, Kategorien und Portfoliodaten per natürlicher Sprache abfragen.
+Lass deinen KI-Assistenten deine Finanzen aus [MoneyMoney](https://moneymoney-app.com/) analysieren und Überweisungen vorbereiten — Kontostände, Transaktionen, Kategorien und Portfoliodaten per natürlicher Sprache abfragen.
 
 > **Inoffizielles Community-Projekt** — nicht von [MRH applications GmbH](https://moneymoney-app.com/impressum/) entwickelt oder unterstützt. MoneyMoney ist eine eingetragene Marke der MRH applications GmbH.
 
@@ -21,6 +21,7 @@ Einfach deinen KI-Assistenten fragen:
 | *„Erstelle eine Übersicht meiner Ausgaben nach Kategorie für Q1"* | Aggregiert und analysiert Transaktionsdaten |
 | *„Wie hat sich mein Portfolio entwickelt?"* | Zeigt Wertpapiere und Portfoliopositionen |
 | *„Vergleiche meine Ausgaben März vs. Februar"* | Analysiert Trends über Zeiträume hinweg |
+| *„Überweise 50€ an Max Mustermann, IBAN DE89..."* | Öffnet vorausgefülltes Überweisungsfenster in MoneyMoney |
 
 ---
 
@@ -147,12 +148,13 @@ In `~/.codeium/windsurf/model_config.json`:
 | `export_transactions` | Transaktionen mit Filtern für Konto, Kategorie, Zeitraum und Limit (Standard: 500, max: 5.000). |
 | `export_categories` | Alle Transaktionskategorien als hierarchischer Baum. |
 | `export_portfolio` | Wertpapiere und Portfoliopositionen, filterbar nach Konto und Anlageklasse. |
+| `create_bank_transfer` | Öffnet ein vorausgefülltes Überweisungsfenster in MoneyMoney. Wird **nicht** automatisch abgeschickt — der Nutzer muss die Überweisung in MoneyMoney prüfen und bestätigen (inkl. TAN). |
 
 ---
 
 ## Sicherheit und Datenschutz
 
-- **Nur lesender Zugriff** — der Server kann keine Überweisungen ausführen oder Daten in MoneyMoney verändern
+- **Überweisungen nur mit Bestätigung** — `create_bank_transfer` öffnet ein vorausgefülltes Fenster, das der Nutzer manuell prüfen und per TAN bestätigen muss. Es wird nie automatisch abgeschickt.
 - **Läuft lokal auf deinem Mac** — keine Cloud, keine externe Server-Verbindung
 - **IBANs standardmäßig maskiert** — vollständige Kontodaten nur auf explizite Anfrage (`includeSensitive`)
 - **Open Source** — der gesamte Code ist einsehbar
