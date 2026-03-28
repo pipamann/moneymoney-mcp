@@ -27,7 +27,21 @@
     "macos",
     "model-context-protocol"
   ],
+  "author": "Leon Heuser",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pipamann/moneymoney-mcp.git"
+  },
+  "homepage": "https://github.com/pipamann/moneymoney-mcp",
+  "bugs": {
+    "url": "https://github.com/pipamann/moneymoney-mcp/issues"
+  },
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.12.1",
     "plist": "^3.1.0"

@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "moneymoney": {
+      "command": "node",
+      "args": ["dist/index.js"],
+      "type": "stdio"
+    }
+  }
+}
