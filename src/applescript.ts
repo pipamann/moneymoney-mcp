@@ -5,6 +5,7 @@ import {
   AutomationDeniedError,
   DatabaseLockedError,
   MoneyMoneyError,
+  ResultTooLargeError,
 } from "./errors.js";
 
 const TIMEOUT_MS = 30_000;
@@ -34,6 +35,9 @@ function classifyError(stderr: string): MoneyMoneyError {
   }
   if (lower.includes("not allowed") || lower.includes("not permitted")) {
     return new AutomationDeniedError();
+  }
+  if (lower.includes("maxbuffer length exceeded") || lower.includes("maxbuffer")) {
+    return new ResultTooLargeError();
   }
   return new AppleScriptError(stderr.trim() || "Unknown AppleScript error");
 }

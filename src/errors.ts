@@ -45,6 +45,16 @@ export class AppleScriptError extends MoneyMoneyError {
   }
 }
 
+export class ResultTooLargeError extends MoneyMoneyError {
+  constructor() {
+    super(
+      "Result too large — the query returned more data than the buffer can hold. Narrow the date range with fromDate/toDate or filter by a specific account.",
+      "RESULT_TOO_LARGE",
+    );
+    this.name = "ResultTooLargeError";
+  }
+}
+
 export class PlistParseError extends MoneyMoneyError {
   constructor(detail?: string) {
     super(
