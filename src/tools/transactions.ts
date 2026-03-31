@@ -122,6 +122,54 @@ export async function exportTransactions(params: {
   };
 }
 
+export interface SearchResult {
+  transactions: Transaction[];
+  totalScanned: number;
+  matchCount: number;
+}
+
+export async function searchTransactions(params: {
+  account?: string;
+  category?: string;
+  fromDate?: string;
+  toDate?: string;
+  search?: string;
+  amountMin?: number;
+  amountMax?: number;
+}): Promise<SearchResult> {
+  const raw = await fetchRawTransactions(params);
+  const searchLower = params.search?.toLowerCase();
+
+  const matched = raw.filter((t) => {
+    if (searchLower) {
+      const haystack = [
+        t.name,
+        t.purpose,
+        t.bookingText,
+        t.accountNumber,
+        t.endToEndReference,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+      if (!haystack.includes(searchLower)) return false;
+    }
+
+    const amount = t.amount ?? 0;
+    const absAmount = Math.abs(amount);
+    if (params.amountMin !== undefined && absAmount < params.amountMin) return false;
+    if (params.amountMax !== undefined && absAmount > params.amountMax) return false;
+
+    return true;
+  });
+
+  return {
+    transactions: matched.map(mapTransaction),
+    totalScanned: raw.length,
+    matchCount: matched.length,
+  };
+}
+
 function mapTransaction(t: RawTransaction): Transaction {
   return {
     id: t.id,

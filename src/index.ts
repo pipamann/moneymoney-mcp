@@ -6,7 +6,7 @@ import * as z from "zod/v4";
 import { MoneyMoneyError } from "./errors.js";
 import { exportAccounts } from "./tools/accounts.js";
 import { exportCategories } from "./tools/categories.js";
-import { exportTransactions } from "./tools/transactions.js";
+import { exportTransactions, searchTransactions } from "./tools/transactions.js";
 import { exportPortfolio } from "./tools/portfolio.js";
 import { createBankTransfer } from "./tools/transfer.js";
 
@@ -153,6 +153,102 @@ server.registerTool(
         toDate,
         limit,
         toFile,
+      });
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: JSON.stringify(result, null, 2),
+          },
+        ],
+      };
+    } catch (e) {
+      return errorResult(e);
+    }
+  },
+);
+
+// --- search_transactions ---
+server.registerTool(
+  "search_transactions",
+  {
+    title: "Search Transactions",
+    description:
+      "Search across ALL transactions in MoneyMoney by text and/or amount. Use this to find specific payments, verify invoices were paid, or locate transactions by recipient name. At least one search filter (search, amountMin, or amountMax) is required. Combine with account/date filters to narrow scope.",
+    inputSchema: z.object({
+      account: z
+        .string()
+        .optional()
+        .describe(
+          "Filter by account: UUID, IBAN, account number, name, or group name",
+        ),
+      category: z
+        .string()
+        .optional()
+        .describe(
+          "Filter by category: UUID, name, or group. Nested names separated with backslash",
+        ),
+      fromDate: z
+        .string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/)
+        .refine((s) => isValidDate(s), "Invalid date")
+        .optional()
+        .describe("Start date (YYYY-MM-DD)"),
+      toDate: z
+        .string()
+        .regex(/^\d{4}-\d{2}-\d{2}$/)
+        .refine((s) => isValidDate(s), "Invalid date")
+        .optional()
+        .describe("End date (YYYY-MM-DD)"),
+      search: z
+        .string()
+        .min(2)
+        .optional()
+        .describe(
+          "Case-insensitive text search across transaction name, purpose, booking text, account number, and end-to-end reference",
+        ),
+      amountMin: z
+        .number()
+        .nonnegative()
+        .optional()
+        .describe(
+          "Minimum absolute amount (matches both debits and credits)",
+        ),
+      amountMax: z
+        .number()
+        .nonnegative()
+        .optional()
+        .describe(
+          "Maximum absolute amount (matches both debits and credits)",
+        ),
+    }),
+    annotations: {
+      readOnlyHint: true,
+      destructiveHint: false,
+      openWorldHint: false,
+    },
+  },
+  async ({ account, category, fromDate, toDate, search, amountMin, amountMax }) => {
+    if (!search && amountMin === undefined && amountMax === undefined) {
+      return {
+        content: [
+          {
+            type: "text" as const,
+            text: "At least one search filter is required: search, amountMin, or amountMax. Use export_transactions for unfiltered browsing.",
+          },
+        ],
+        isError: true,
+      };
+    }
+    try {
+      const result = await searchTransactions({
+        account,
+        category,
+        fromDate,
+        toDate,
+        search,
+        amountMin,
+        amountMax,
       });
       return {
         content: [
