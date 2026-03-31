@@ -46,14 +46,12 @@ export interface TransactionsResult {
   truncated: boolean;
 }
 
-export async function exportTransactions(params: {
+async function fetchRawTransactions(params: {
   account?: string;
   category?: string;
   fromDate?: string;
   toDate?: string;
-  limit?: number;
-}): Promise<TransactionsResult> {
-  const limit = params.limit ?? 500;
+}): Promise<RawTransaction[]> {
   const parts: string[] = ["export transactions"];
 
   if (params.account) {
@@ -73,10 +71,19 @@ export async function exportTransactions(params: {
   const xml = await runMoneyMoneyCommand(parts.join(" "));
   const data = parsePlist(xml) as RawTransactionExport;
 
-  const raw = data?.transactions;
-  if (!Array.isArray(raw)) {
-    return { transactions: [], totalCount: 0, returned: 0, truncated: false };
-  }
+  return Array.isArray(data?.transactions) ? data.transactions : [];
+}
+
+export async function exportTransactions(params: {
+  account?: string;
+  category?: string;
+  fromDate?: string;
+  toDate?: string;
+  limit?: number;
+}): Promise<TransactionsResult> {
+  const limit = params.limit ?? 200;
+
+  const raw = await fetchRawTransactions(params);
 
   const totalCount = raw.length;
   const truncated = totalCount > limit;
