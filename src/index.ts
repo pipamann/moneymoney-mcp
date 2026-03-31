@@ -19,7 +19,7 @@ function isValidDate(s: string): boolean {
 
 const server = new McpServer({
   name: "moneymoney-mcp",
-  version: "0.1.0",
+  version: "0.3.0",
 });
 
 // --- export_accounts ---
