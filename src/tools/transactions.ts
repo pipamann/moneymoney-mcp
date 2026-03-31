@@ -85,6 +85,23 @@ async function fetchRawTransactions(params: {
   return Array.isArray(data?.transactions) ? data.transactions : [];
 }
 
+function mapTransaction(t: RawTransaction): Transaction {
+  return {
+    id: t.id,
+    date: formatDate(t.bookingDate),
+    valueDate: formatDate(t.valueDate),
+    name: t.name ?? "",
+    amount: t.amount ?? 0,
+    currency: t.currency,
+    purpose: t.purpose,
+    bookingText: t.bookingText,
+    categoryUuid: t.categoryUuid,
+    accountUuid: t.accountUuid,
+    checkmark: t.checkmark ?? false,
+    booked: t.booked ?? true,
+  };
+}
+
 export async function exportTransactions(params: {
   account?: string;
   category?: string;
@@ -167,22 +184,5 @@ export async function searchTransactions(params: {
     transactions: matched.map(mapTransaction),
     totalScanned: raw.length,
     matchCount: matched.length,
-  };
-}
-
-function mapTransaction(t: RawTransaction): Transaction {
-  return {
-    id: t.id,
-    date: formatDate(t.bookingDate),
-    valueDate: formatDate(t.valueDate),
-    name: t.name ?? "",
-    amount: t.amount ?? 0,
-    currency: t.currency,
-    purpose: t.purpose,
-    bookingText: t.bookingText,
-    categoryUuid: t.categoryUuid,
-    accountUuid: t.accountUuid,
-    checkmark: t.checkmark ?? false,
-    booked: t.booked ?? true,
   };
 }
