@@ -1,3 +1,6 @@
+import { writeFile } from "node:fs/promises";
+import { join } from "node:path";
+import { tmpdir } from "node:os";
 import { escapeAppleScript, runMoneyMoneyCommand } from "../applescript.js";
 import { formatDate, parsePlist } from "../plist.js";
 
@@ -46,6 +49,14 @@ export interface TransactionsResult {
   truncated: boolean;
 }
 
+export interface ToFileResult {
+  filePath: string;
+  totalCount: number;
+  account: string | undefined;
+  fromDate: string | undefined;
+  toDate: string | undefined;
+}
+
 async function fetchRawTransactions(params: {
   account?: string;
   category?: string;
@@ -80,15 +91,27 @@ export async function exportTransactions(params: {
   fromDate?: string;
   toDate?: string;
   limit?: number;
-}): Promise<TransactionsResult> {
-  const limit = params.limit ?? 200;
-
+  toFile?: boolean;
+}): Promise<TransactionsResult | ToFileResult> {
   const raw = await fetchRawTransactions(params);
 
+  if (params.toFile) {
+    const transactions = raw.map(mapTransaction);
+    const filePath = join(tmpdir(), `moneymoney-export-${Date.now()}.json`);
+    await writeFile(filePath, JSON.stringify(transactions, null, 2));
+    return {
+      filePath,
+      totalCount: transactions.length,
+      account: params.account,
+      fromDate: params.fromDate,
+      toDate: params.toDate,
+    };
+  }
+
+  const limit = params.limit ?? 200;
   const totalCount = raw.length;
   const truncated = totalCount > limit;
   const sliced = truncated ? raw.slice(0, limit) : raw;
-
   const transactions = sliced.map(mapTransaction);
 
   return {

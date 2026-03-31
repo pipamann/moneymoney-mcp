@@ -97,7 +97,7 @@ server.registerTool(
   {
     title: "Export Transactions",
     description:
-      "Returns transactions from MoneyMoney with optional filters for account, category, and date range. Results are limited to 500 by default; use fromDate/toDate to narrow the window.",
+      "Returns transactions from MoneyMoney. Default limit is 200 — use search_transactions for targeted lookups in high-volume accounts. Set toFile=true to dump all transactions to a temp file (returns file path only — use Grep/Read to search it).",
     inputSchema: z.object({
       account: z
         .string()
@@ -127,10 +127,16 @@ server.registerTool(
         .number()
         .int()
         .min(1)
-        .max(5000)
         .optional()
-        .default(500)
-        .describe("Max transactions to return (default: 500, max: 5000)"),
+        .default(200)
+        .describe("Max transactions to return (default: 200). Ignored when toFile=true."),
+      toFile: z
+        .boolean()
+        .optional()
+        .default(false)
+        .describe(
+          "Write ALL transactions to a temp JSON file instead of returning them inline. Returns only the file path and summary. Use Grep/Read to search the file. Local-only feature.",
+        ),
     }),
     annotations: {
       readOnlyHint: true,
@@ -138,7 +144,7 @@ server.registerTool(
       openWorldHint: false,
     },
   },
-  async ({ account, category, fromDate, toDate, limit }) => {
+  async ({ account, category, fromDate, toDate, limit, toFile }) => {
     try {
       const result = await exportTransactions({
         account,
@@ -146,6 +152,7 @@ server.registerTool(
         fromDate,
         toDate,
         limit,
+        toFile,
       });
       return {
         content: [
