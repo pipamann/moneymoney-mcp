@@ -71,12 +71,13 @@ async function fetchRawTransactions(params: {
   if (params.category) {
     parts.push(`from category "${escapeAppleScript(params.category)}"`);
   }
-  if (params.fromDate) {
-    parts.push(`from date "${escapeAppleScript(params.fromDate)}"`);
-  }
-  if (params.toDate) {
-    parts.push(`to date "${escapeAppleScript(params.toDate)}"`);
-  }
+
+  // MoneyMoney requires date parameters when account/category filters are used
+  const fromDate = params.fromDate ?? "2000-01-01";
+  const toDate = params.toDate ?? new Date().toISOString().split("T")[0];
+  parts.push(`from date "${escapeAppleScript(fromDate)}"`);
+  parts.push(`to date "${escapeAppleScript(toDate)}"`);
+
   parts.push('as "plist"');
 
   const xml = await runMoneyMoneyCommand(parts.join(" "));
